@@ -1,7 +1,7 @@
 <template>
   <div>
     <label class="block text-sm font-medium mb-2">Zoom: {{ modelValue.toFixed(1) }}x</label>
-    <URange 
+    <USlider 
       :model-value="modelValue"
       :min="1" 
       :max="3" 

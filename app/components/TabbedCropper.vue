@@ -87,9 +87,9 @@
             <div v-if="activeTabIndex === 'preset'" class="space-y-4">
               <div v-for="(size, index) in presetSizes" :key="index">
                 <UButton
-                  block
-                  :color="selectedPreset === size ? 'primary' : 'gray'"
-                  variant="soft"
+                  :icon="size.icon"
+                  :color="selectedPreset === size ? 'primary' : 'neutral'"
+                  variant="outline"
                   class="mb-2"
                   @click="selectPreset(size)"
                 >
@@ -183,7 +183,7 @@ if (process.client) {
 const imageUrl = ref('');
 const croppedImage = ref(null);
 const cropperRef = ref(null);
-const activeTabIndex = ref(0);
+const activeTabIndex = ref('custom');
 const customWidth = ref(800);
 const customHeight = ref(600);
 const lockAspectRatio = ref(true);
@@ -206,10 +206,10 @@ const tabs = [
 
 // Preset sizes
 const presetSizes = [
-  { label: 'Profile Picture (400x400)', width: 400, height: 400 },
-  { label: 'Cover Photo (1200x630)', width: 1200, height: 630 },
-  { label: 'Instagram Post (1080x1080)', width: 1080, height: 1080 },
-  { label: 'Twitter Header (1500x500)', width: 1500, height: 500 }
+  { label: 'Profile Picture (400x400)', width: 400, height: 400, icon: 'i-lucide-user'},
+  { label: 'Cover Photo (1200x630)', width: 1200, height: 630, icon: 'i-lucide-wallpaper'},
+  { label: 'Instagram Post (1080x1080)', width: 1080, height: 1080, icon: 'i-lucide-instagram' },
+  { label: 'Twitter Header (1500x500)', width: 1500, height: 500, icon: 'i-lucide-twitter' }
 ];
 
 // Computed properties
