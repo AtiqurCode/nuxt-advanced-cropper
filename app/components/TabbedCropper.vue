@@ -88,7 +88,7 @@
               <div v-for="(size, index) in presetSizes" :key="index">
                 <UButton
                   :icon="size.icon"
-                  :color="selectedPreset === size ? 'primary' : 'neutral'"
+                  :color="selectedPreset?.label === size.label ? 'primary' : 'neutral'"
                   variant="outline"
                   class="mb-2"
                   @click="selectPreset(size)"
@@ -169,29 +169,41 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, onMounted, type Ref } from 'vue';
+
+// Types
+interface PresetSize {
+  label: string;
+  width: number;
+  height: number;
+  icon: string;
+}
+interface TabItem {
+  label: string;
+  slot: string;
+  value: string;
+}
 
 // Import Cropper conditionally for Nuxt compatibility
-let Cropper;
+let Cropper: any;
 if (process.client) {
   Cropper = (await import('vue-advanced-cropper')).Cropper;
   await import('vue-advanced-cropper/dist/style.css');
 }
 
 // State variables
-const imageUrl = ref('');
-const croppedImage = ref(null);
-const cropperRef = ref(null);
-const activeTabIndex = ref('custom');
-const customWidth = ref(800);
-const customHeight = ref(600);
-const lockAspectRatio = ref(true);
-const selectedPreset = ref(null);
+const imageUrl = ref<string>('');
+const croppedImage = ref<string | null>(null);
+const cropperRef = ref<any>(null);
+const activeTabIndex = ref<'custom' | 'preset'>('custom');
+const customWidth = ref<number>(800);
+const customHeight = ref<number>(600);
+const lockAspectRatio = ref<boolean>(true);
+const selectedPreset = ref<PresetSize | null>(null);
 
 // Tabs configuration
-
-const tabs = [
+const tabs: TabItem[] = [
   {
     label: 'Custom Size',
     slot: 'custom',
@@ -202,10 +214,10 @@ const tabs = [
     slot: 'preset',
     value: 'preset'
   }
-]
+];
 
 // Preset sizes
-const presetSizes = [
+const presetSizes: PresetSize[] = [
   { label: 'Profile Picture (400x400)', width: 400, height: 400, icon: 'i-lucide-user'},
   { label: 'Cover Photo (1200x630)', width: 1200, height: 630, icon: 'i-lucide-wallpaper'},
   { label: 'Instagram Post (1080x1080)', width: 1080, height: 1080, icon: 'i-lucide-instagram' },
@@ -213,7 +225,7 @@ const presetSizes = [
 ];
 
 // Computed properties
-const hasImage = computed(() => !!imageUrl.value);
+const hasImage = computed<boolean>(() => !!imageUrl.value);
 
 const stencilProps = computed(() => {
   if (activeTabIndex.value === 'custom') {
@@ -237,8 +249,9 @@ const stencilProps = computed(() => {
 });
 
 // Methods
-function handleFileUpload(event) {
-  const file = event.target.files[0];
+function handleFileUpload(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
   if (file && file.type.startsWith('image/')) {
     setTimeout(() => {
       imageUrl.value = URL.createObjectURL(file);
@@ -259,7 +272,7 @@ function resetAdjustments() {
   }
 }
 
-function onChange({ coordinates, canvas }) {
+function onChange({ coordinates, canvas }: { coordinates: any; canvas: HTMLCanvasElement | null }) {
   if (canvas) {
     croppedImage.value = canvas.toDataURL('image/jpeg');
   }
@@ -271,7 +284,7 @@ function updateCustomSize() {
   }
 }
 
-function selectPreset(size) {
+function selectPreset(size: PresetSize) {
   selectedPreset.value = size;
   if (cropperRef.value) {
     cropperRef.value.refresh();
@@ -280,7 +293,6 @@ function selectPreset(size) {
 
 function downloadImage() {
   if (!croppedImage.value) return;
-  
   const link = document.createElement('a');
   link.download = 'cropped-image.jpg';
   link.href = croppedImage.value;
